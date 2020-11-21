@@ -103,7 +103,7 @@ composer require "raylin666/event"
     dump($eventManage->trigger(new startEvent(
         [
             'id' => 1,
-            'name' => 'engr'
+            'name' => 'raylin'
         ],
         2
     )));

@@ -21,5 +21,5 @@ interface EventRegisterInterface
      * 返回注册事件名称
      * @return array
      */
-    public function events(): array;
+    public function returnEventNames(): array;
 }

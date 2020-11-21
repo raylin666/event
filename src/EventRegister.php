@@ -36,9 +36,9 @@ class EventRegister implements EventRegisterInterface
     /**
      * @return array
      */
-    public function events(): array
+    public function returnEventNames(): array
     {
-        // TODO: Implement events() method.
+        // TODO: Implement returnEventNames() method.
 
         return $this->events;
     }

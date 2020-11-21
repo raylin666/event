@@ -37,7 +37,7 @@ class Event implements EventInterface
      */
     public function __construct(EventRegisterInterface $eventRegister)
     {
-        $this->register = $eventRegister->events();
+        $this->register = $eventRegister->returnEventNames();
     }
 
     /**
