@@ -16,7 +16,7 @@ composer require "raylin666/event-dispatcher"
 
 ### 使用方式
 
-event-dispatcher 是一个事件派发系统。它派发一个事件，并以优先级顺序调用预先定义的事件处理程序。
+## event-dispatcher 是一个事件派发系统。它派发一个事件，并以优先级顺序调用预先定义的事件处理程序。
 
 事件系统由以下5个概念构成：
 
@@ -25,6 +25,8 @@ event-dispatcher 是一个事件派发系统。它派发一个事件，并以优
     Listener Provider: 它负责将事件(Event)与监听器(Listener)进行关联，在触发一个事件时，Listener Provider 需要提供绑定在该事件上的所有监听器。
     派发器 (EventDispatcher): 负责通知某一事件发生了。我们所说的“向某一目标派发一个事件”，这里的“目标”指的是 Listener Provider，也就是说，EventDispatcher 向 Listener Provider 派发了 Event。
     订阅器 (Subscriber): 订阅器是 Listener Provider 的扩展，它可以将不同的事件和订阅器里的方法进行自由绑定，这些操作都在订阅器内部进行，这样可以将同类事件的绑定与处理内聚，便于管理。
+
+```php
 
 <?php
 
@@ -68,12 +70,10 @@ class Listener implements \Raylin666\EventDispatcher\Contracts\ListenerInterface
 
 $container = new Raylin666\Container\Container();
 $listenerProvider = new \Raylin666\EventDispatcher\ListenerProvider();
-
 $container->add(\Raylin666\EventDispatcher\Contracts\ListenerProviderInterface::class, $listenerProvider);
 $eventDispatcherFactory = new \Raylin666\EventDispatcher\EventDispatcherFactory;
-$eventDispatcher = $eventDispatcherFactory($container);
-
 $listenerProvider = $container->get(\Raylin666\EventDispatcher\Contracts\ListenerProviderInterface::class);
+$eventDispatcher = $eventDispatcherFactory($container);
 
 $onStart1 = new onStart1();
 $onStart2 = new onStart2('hello world');
@@ -175,6 +175,8 @@ swooleEvent1
 */
 
 ?>
+
+```
 
 ## 更新日志
 
