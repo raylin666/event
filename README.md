@@ -16,7 +16,7 @@ composer require "raylin666/event-dispatcher"
 
 ### 使用方式
 
-## event-dispatcher 是一个事件派发系统。它派发一个事件，并以优先级顺序调用预先定义的事件处理程序。
+#### event-dispatcher 是一个事件派发系统。它派发一个事件，并以优先级顺序调用预先定义的事件处理程序。
 
 事件系统由以下5个概念构成：
 
