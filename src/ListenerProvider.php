@@ -11,11 +11,13 @@
 
 namespace Raylin666\EventDispatcher;
 
+use InvalidArgumentException;
 use Raylin666\Core\Helper\ArrayHelper;
 use Raylin666\EventDispatcher\Contracts\EventInterface;
 use Raylin666\EventDispatcher\Contracts\ListenerProviderInterface;
 use Raylin666\EventDispatcher\Contracts\SubscriberInterface;
 use SplPriorityQueue;
+use Closure;
 
 /**
  * Class ListenerProvider
@@ -71,9 +73,46 @@ class ListenerProvider implements ListenerProviderInterface
         $this->listeners[$event][] = new EventRegister($event, $listener, $priority);
     }
 
+    /**
+     * @param SubscriberInterface $subscriber
+     * @return mixed|void
+     */
     public function addSubscriber(SubscriberInterface $subscriber)
     {
         // TODO: Implement addSubscriber() method.
+
+        $closure = $this->getSubscriberRegister($subscriber);
+        $subscriber->subscribe($closure);
+    }
+
+    /**
+     * Get the subscriber register closure.
+     * @param SubscriberInterface $subscriber
+     * @throws InvalidArgumentException
+     * @return Closure
+     */
+    private function getSubscriberRegister(SubscriberInterface $subscriber): Closure
+    {
+        $closure = function ($event, ...$methods) use ($subscriber) {
+            foreach ($methods as $value) {
+                switch (true) {
+                    case is_string($value):
+                        $method = $value;
+                        $priority = 1;
+                        break;
+                    case is_array($value):
+                        $method = $value[0];
+                        $priority = $value[1] ?? 1;
+                        break;
+                    default:
+                        throw new InvalidArgumentException('method parameters only accepts string or array.');
+                }
+
+                $this->addListener($event, [$subscriber, $method], $priority);
+            }
+        };
+
+        return $closure->bindTo($this);
     }
 
     /**
@@ -90,7 +129,7 @@ class ListenerProvider implements ListenerProviderInterface
      */
     public function hasEvent(string $eventName): bool
     {
-        return isset($this->listeners[$eventName]);
+        return array_key_exists($eventName, $this->listeners);
     }
 
     /**

@@ -26,97 +26,155 @@ event-dispatcher 是一个事件派发系统。它派发一个事件，并以优
     派发器 (EventDispatcher): 负责通知某一事件发生了。我们所说的“向某一目标派发一个事件”，这里的“目标”指的是 Listener Provider，也就是说，EventDispatcher 向 Listener Provider 派发了 Event。
     订阅器 (Subscriber): 订阅器是 Listener Provider 的扩展，它可以将不同的事件和订阅器里的方法进行自由绑定，这些操作都在订阅器内部进行，这样可以将同类事件的绑定与处理内聚，便于管理。
 
-一 、EventDispatcher 的使用
+<?php
 
-    class a
-    {
-        public function __construct(string $string)
-        {
-            dump($string);
-        }
-    }
-    
-    $dispatcher = new \Raylin666\Event\EventDispatcher();
-    $dispatcher->dispatch(new a('en'));
-    dump($dispatcher->getDispatch(a::class));
-    
-二 、事件与监听器
+require_once 'vendor/autoload.php';
 
-    class startEvent extends \Raylin666\Event\Contracts\EventAbstract
+class onStart1
+{
+    public function event1()
     {
-        public $data;
-    
-        public $id;
-    
-        public function __construct($data, $id)
-        {
-            $this->data = $data;
-            $this->id = $id;
-        }
+        echo 'onStart1-event1' . PHP_EOL;
     }
-    
-    class startListener extends \Raylin666\Event\Contracts\ListenerAbstract
+
+    public function event2($event, $name, $callback)
     {
-        /**
-         * @param startEvent $event
-         * @return mixed|void
-         */
-        public function process(object $event)
-        {
-            // TODO: Implement process() method.
-    
-            $this->getEvent()->setId(33);
-            $event->setId(20);
-            dump($event->getId());
-        }
+        echo $name . $callback();
     }
-    
-    class start1Listener extends \Raylin666\Event\Contracts\ListenerAbstract
+}
+
+class onStart2
+{
+    public function __construct($name)
     {
-        public function process(object $event)
-        {
-            // TODO: Implement process() method.
-            dump(1);
-        }
+        $this->name = $name;
     }
-    
-    class start2Listener extends \Raylin666\Event\Contracts\ListenerAbstract
+
+    public function getName()
     {
-        public function process(object $event)
-        {
-            // TODO: Implement process() method.
-            dump(2);
-        }
+        echo $this->name . PHP_EOL;
     }
-    
-    $listeners = [
-        startEvent::class => [
-            startListener::class,
-            start1Listener::class
-        ],
-    ];
-    
-    $event = new \Raylin666\Event\Event(new \Raylin666\Event\EventRegister(array_keys($listeners)));
-    $eventManage = new \Raylin666\Event\EventManager($event);
-    foreach ($listeners as $event => $listener) {
-        $eventManage->addListener($event, $listener);
+}
+
+class Listener implements \Raylin666\EventDispatcher\Contracts\ListenerInterface
+{
+    public function process(object $event)
+    {
+        // TODO: Implement process() method.
+
+        echo 'Listener-process' . PHP_EOL;
     }
-    $eventManage->addListener(startEvent::class, [
-        start2Listener::class
-    ]);
-    $eventManage->addListener(startEvent::class, [
-        function ($event) {
-            dump($event);
-        }
-    ]);
-    
-    dump($eventManage->trigger(new startEvent(
-        [
-            'id' => 1,
-            'name' => 'raylin'
-        ],
-        2
-    )));
+}
+
+$container = new Raylin666\Container\Container();
+$listenerProvider = new \Raylin666\EventDispatcher\ListenerProvider();
+
+$container->add(\Raylin666\EventDispatcher\Contracts\ListenerProviderInterface::class, $listenerProvider);
+$eventDispatcherFactory = new \Raylin666\EventDispatcher\EventDispatcherFactory;
+$eventDispatcher = $eventDispatcherFactory($container);
+
+$listenerProvider = $container->get(\Raylin666\EventDispatcher\Contracts\ListenerProviderInterface::class);
+
+$onStart1 = new onStart1();
+$onStart2 = new onStart2('hello world');
+
+$listenerProvider->addListener('onStart', [$onStart1, 'event1'], 2);
+$listenerProvider->addListener('onStart', [$onStart1, 'event2', ['hei raylin', function () {
+    echo 'event2 callback' . PHP_EOL;
+}]], 3);
+$listenerProvider->addListener('onStart', [$onStart2, 'getName'], 1);
+$listenerProvider->addListener('onStart', function ($event) {
+    echo $event->getName() . PHP_EOL;
+});
+$listenerProvider->addListener('onStart', Listener::class);
+
+class onStartEvent extends \Raylin666\EventDispatcher\Event
+{
+    public function getName(): string
+    {
+        // TODO: Implement getName() method.
+
+        return 'onStart';
+    }
+
+    public function isPropagationStopped(): bool
+    {
+        // TODO: Implement isPropagationStopped() method.
+
+        return false;
+    }
+}
+
+$onStartEvent = new onStartEvent();
+
+$eventDispatcher->dispatch($onStartEvent);
+
+//  输出
+/*
+event2 callback
+hei raylinonStart1-event1
+onStart
+hello world
+Listener-process
+*/
+
+
+### 订阅器 [订阅器(Subscriber)实际上是对 ListenerProvider::addListener 的一种装饰]
+    /* 利用 ListenerProvider::addListener 添加事件和监听器的关系，这种方式比较过程化，
+        也无法体现出一组事件之间的关系，所以在实践中往往会提出“订阅器”的概念*/
+
+class onStartSubscriber implements \Raylin666\EventDispatcher\Contracts\SubscriberInterface
+{
+    public function subscribe(Closure $subscriber)
+    {
+        // TODO: Implement subscribe() method.
+
+        $subscriber(
+            'swoole.onstart',
+            'swooleEvent1',
+            ['swooleEvent2', 2]
+        );
+    }
+
+    public function swooleEvent1(\Raylin666\EventDispatcher\Contracts\EventInterface $event)
+    {
+        echo 'swooleEvent1' . PHP_EOL;
+    }
+
+    public function swooleEvent2(\Raylin666\EventDispatcher\Contracts\EventInterface $event)
+    {
+        echo 'swooleEvent2' . PHP_EOL;
+    }
+}
+
+$listenerProvider->addSubscriber(new onStartSubscriber());
+
+class swooleOnStartEvent extends \Raylin666\EventDispatcher\Event
+{
+    public function getName(): string
+    {
+        // TODO: Implement getName() method.
+
+        return 'swoole.onstart';
+    }
+}
+
+$swooleOnStartEvent = new swooleOnStartEvent();
+
+$eventDispatcher->dispatch($swooleOnStartEvent);
+
+//  输出
+/*
+event2 callback
+hei raylinonStart1-event1
+onStart
+hello world
+Listener-process
+swooleEvent2
+swooleEvent1
+*/
+
+?>
 
 ## 更新日志
 

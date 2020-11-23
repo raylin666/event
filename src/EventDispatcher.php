@@ -63,8 +63,15 @@ class EventDispatcher implements EventDispatcherInterface
         }
 
         foreach ($this->getListenerProvider()->getListenersForEvent($event) as $listener) {
-            if (is_object($listener) || is_callable($listener)) {
-                $listener($event);
+            if (is_object($listener) || is_callable($listener) || is_array($listener)) {
+                if (is_array($listener) && (count($listener) > 2)) {
+                    // 处理$listener格式类似 [$onStart, 'event', [1, 'raylin', function () {}]]
+                    $listener[2] && is_array($listener[2]) ?
+                        ([$listener[0], $listener[1]])($event, ...$listener[2])
+                        : ([$listener[0], $listener[1]])($event, $listener[2]);
+                } else {
+                    $listener($event);
+                }
 
                 if ($this->isEventPropagationStopped($event)) {
                     break;
