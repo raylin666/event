@@ -11,32 +11,25 @@
 
 namespace Raylin666\EventDispatcher\Contracts;
 
+use Psr\EventDispatcher\ListenerProviderInterface as PsrListenerProviderInterface;
+
 /**
- * Interface EventRegisterInterface
+ * Interface ListenerProviderInterface
  * @package Raylin666\EventDispatcher\Contracts
  */
-interface EventRegisterInterface
+interface ListenerProviderInterface extends PsrListenerProviderInterface
 {
     /**
-     * EventRegisterInterface constructor.
      * @param string $event
      * @param        $listener
      * @param int    $priority
-     */
-    public function __construct(string $event, $listener, int $priority);
-
-    /**
-     * @return string
-     */
-    public function getEvent(): string;
-
-    /**
      * @return mixed
      */
-    public function getListener();
+    public function addListener(string $event, $listener, int $priority = 1);
 
     /**
-     * @return int
+     * @param SubscriberInterface $subscriber
+     * @return mixed
      */
-    public function getPriority(): int;
+    public function addSubscriber(SubscriberInterface $subscriber);
 }

@@ -9,15 +9,20 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\Event\Contracts;
+namespace Raylin666\EventDispatcher\Contracts;
 
-use Psr\EventDispatcher\EventDispatcherInterface as PsrEventDispatcherInterface;
+use Closure;
 
 /**
- * Interface EventDispatcherInterface
- * @package Raylin666\Event\Contracts
+ * Interface SubscriberInterface
+ * @package Raylin666\EventDispatcher\Contracts
  */
-interface EventDispatcherInterface extends PsrEventDispatcherInterface
+interface SubscriberInterface
 {
-
+    /**
+     * Register the subscriber for each event.
+     * @param Closure $subscriber   [eventId => [mathod, priority]][]
+     * @return mixed
+     */
+    public function subscribe(Closure $subscriber);
 }

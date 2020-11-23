@@ -9,105 +9,56 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\Event;
+namespace Raylin666\EventDispatcher;
 
-use Raylin666\Event\Contracts\EventHandleInterface;
-use Raylin666\Event\Contracts\EventInterface;
-use Raylin666\Event\Contracts\EventRegisterInterface;
+use Psr\EventDispatcher\StoppableEventInterface;
+use Raylin666\EventDispatcher\Contracts\EventInterface;
+use Serializable;
 
 /**
  * Class Event
- * @package Raylin666\Event
+ * @package Raylin666\EventDispatcher
  */
-class Event implements EventInterface
+abstract class Event implements EventInterface, StoppableEventInterface, Serializable
 {
     /**
-     * @var array
+     * @return string
      */
-    private $register = [];
-
-    /**
-     * @var array
-     */
-    private $events = [];
-
-    /**
-     * Event constructor.
-     * @param EventRegisterInterface $eventRegister
-     */
-    public function __construct(EventRegisterInterface $eventRegister)
+    public function getName(): string
     {
-        $this->register = $eventRegister->returnEventNames();
+        // TODO: Implement getName() method.
+
+        return static::class;
     }
 
     /**
-     * @param string                $event
-     * @param callable              $callback
-     * @return EventInterface
-     */
-    public function add(string $event, callable $callback): EventInterface
-    {
-        // TODO: Implement add() method.
-
-        if (in_array($event, $this->register)) {
-            $this->events[$event][] = $callback;
-        }
-
-        return $this;
-    }
-
-    /**
-     * @param string $event
      * @return bool
      */
-    public function has(string $event): bool
+    public function isPropagationStopped(): bool
     {
-        // TODO: Implement has() method.
+        // TODO: Implement isPropagationStopped() method.
 
-        return isset($this->events[$event]) ? true : false;
+        return false;
     }
 
     /**
-     * @param string $event
-     * @return array|null
+     * @return string
      */
-    public function get(string $event): ?array
+    public function serialize()
     {
-        // TODO: Implement get() method.
+        // TODO: Implement serialize() method.
 
-        return isset($this->events[$event]) ? $this->events[$event] : null;
+        return serialize($this);
     }
 
     /**
-     * @param string $event
-     * @return EventInterface
-     */
-    public function del(string $event): EventInterface
-    {
-        // TODO: Implement del() method.
-
-        unset($this->events[$event]);
-
-        return $this;
-    }
-
-    /**
-     * @return array
-     */
-    public function all(): array
-    {
-        // TODO: Implement all() method.
-
-        return $this->events;
-    }
-
-    /**
+     * @param string $serialized
      * @return mixed|void
      */
-    public function clear()
+    public function unserialize($serialized)
     {
-        // TODO: Implement clear() method.
+        // TODO: Implement unserialize() method.
 
-        $this->events = [];
+        return unserialize($serialized);
     }
 }

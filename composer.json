@@ -1,15 +1,18 @@
 {
-  "name": "raylin666/event",
+  "name": "raylin666/event-dispatcher",
   "type": "library",
-  "description": "Event manager",
+  "description": "An event dispatching system with PSR-14.",
   "keywords" : [
     "php",
     "event",
     "dispatcher",
     "psr",
-    "swoole"
+    "swoole",
+    "psr",
+    "psr-14",
+    "event-dispacher"
   ],
-  "homepage": "https://github.com/raylin666/event",
+  "homepage": "https://github.com/raylin666/event-dispatcher",
   "license" : "Apache-2.0",
   "authors": [
     {
@@ -23,16 +26,17 @@
     "ext-json": ">=1.0",
     "ext-openssl": ">=7.2",
     "raylin666/core": "dev-master",
+    "raylin666/container": "dev-master",
     "psr/event-dispatcher": "^1.0"
   },
   "autoload": {
     "psr-4": {
-      "Raylin666\\Event\\": "src/"
+      "Raylin666\\EventDispatcher\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Raylin666\\Event\\Tests\\": "tests/"
+      "Raylin666\\EventDispatcher\\Tests\\": "tests/"
     }
   },
   "extra": {},

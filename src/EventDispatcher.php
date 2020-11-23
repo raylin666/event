@@ -9,80 +9,90 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\Event;
+namespace Raylin666\EventDispatcher;
 
-use Raylin666\Core\Helper\ObjectHelper;
-use Raylin666\Event\Contracts\EventDispatcherInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Raylin666\EventDispatcher\Contracts\EventInterface;
+use Raylin666\EventDispatcher\Contracts\ListenerInterface;
+use Raylin666\EventDispatcher\Contracts\ListenerProviderInterface;
+use Psr\EventDispatcher\StoppableEventInterface;
+use TypeError;
 
 /**
  * Class EventDispatcher
- * @package Raylin666\Event
+ * @package Raylin666\EventDispatcher
  */
 class EventDispatcher implements EventDispatcherInterface
 {
     /**
-     * @var array
+     * @var ListenerProviderInterface
      */
-    private $events = [];
+    protected $listenerProvider;
+
+    /**
+     * EventDispatcher constructor.
+     * @param ListenerProviderInterface $listenerProvider
+     */
+    public function __construct(ListenerProviderInterface $listenerProvider)
+    {
+        $this->listenerProvider = $listenerProvider;
+    }
+
+    /**
+     * @return ListenerProviderInterface
+     */
+    public function getListenerProvider(): ListenerProviderInterface
+    {
+        return $this->listenerProvider;
+    }
 
     /**
      * @param object $event
-     * @return object|void
+     * @return object
      */
     public function dispatch(object $event)
     {
         // TODO: Implement dispatch() method.
 
-        $this->events[ObjectHelper::getReflectionClass($event)->getName()] = $event;
+        if (!$event instanceof EventInterface) {
+            throw new TypeError('The named event must implement \Raylin666\Event\Contracts\EventInterface.');
+        }
+
+        if ($this->isEventPropagationStopped($event)) {
+            return $event;
+        }
+
+        foreach ($this->getListenerProvider()->getListenersForEvent($event) as $listener) {
+            if (is_object($listener) || is_callable($listener)) {
+                $listener($event);
+
+                if ($this->isEventPropagationStopped($event)) {
+                    break;
+                }
+
+                continue ;
+            }
+
+            if (is_string($listener) && class_exists($listener)) {
+                $class = new $listener;
+                if ($class instanceof ListenerInterface) {
+                    $class->process($event);
+                }
+            }
+        }
+
+        return $event;
     }
 
     /**
-     * @return array
-     */
-    public function getAllDispatch(): array
-    {
-        return $this->events;
-    }
-
-    /**
-     * @return array
-     */
-    public function getAllDispatchNames(): array
-    {
-        return array_keys($this->events);
-    }
-
-    /**
-     * @param string $event_name
+     * @param object $event
      * @return bool
      */
-    public function hasDispatch(string $event_name): bool
+    protected function isEventPropagationStopped(object $event): bool
     {
-        return isset($this->events[$event_name]) ? true : false;
-    }
-
-    /**
-     * @param string $event_name
-     * @return mixed|null
-     */
-    public function getDispatch(string $event_name)
-    {
-        return isset($this->events[$event_name]) ? $this->events[$event_name] : null;
-    }
-
-    /**
-     * @param string $event_name
-     */
-    public function removeDispatch(string $event_name)
-    {
-        unset($this->events[$event_name]);
-    }
-
-    /**
-     * clear all dispatch
-     */
-    public function clearAllDispatch()
-    {
-        $this->events = [];
+        return (
+            $event instanceof StoppableEventInterface
+            && $event->isPropagationStopped()
+        );
     }
 }

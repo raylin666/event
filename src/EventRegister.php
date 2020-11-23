@@ -9,37 +9,71 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\Event;
+namespace Raylin666\EventDispatcher;
 
-use Raylin666\Event\Contracts\EventRegisterInterface;
+use Raylin666\EventDispatcher\Contracts\EventRegisterInterface;
 
 /**
  * Class EventRegister
- * @package Raylin666\Event
+ * @package Raylin666\EventDispatcher
  */
 class EventRegister implements EventRegisterInterface
 {
     /**
-     * @var array
+     * @var string
      */
-    protected $events = [];
+    protected $event;
+
+    /**
+     * @var
+     */
+    protected $listener;
+
+    /**
+     * @var int
+     */
+    protected $priority;
 
     /**
      * EventRegister constructor.
-     * @param array $events
+     * @param string $event
+     * @param        $listener
+     * @param int    $priority
      */
-    public function __construct(array $events)
+    public function __construct(string $event, $listener, int $priority)
     {
-        $this->events = $events;
+        $this->event = $event;
+        $this->listener = $listener;
+        $this->priority = $priority;
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function returnEventNames(): array
+    public function getEvent(): string
     {
-        // TODO: Implement returnEventNames() method.
+        // TODO: Implement getEvent() method.
 
-        return $this->events;
+        return $this->event;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getListener()
+    {
+        // TODO: Implement getListener() method.
+
+        return $this->listener;
+    }
+
+    /**
+     * @return int
+     */
+    public function getPriority(): int
+    {
+        // TODO: Implement getPriority() method.
+
+        return $this->priority;
     }
 }

@@ -9,24 +9,17 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\Event\Contracts;
+namespace Raylin666\EventDispatcher\Contracts;
 
 /**
- * Interface EventListenerInterface
- * @package Raylin666\Event\Contracts
+ * Interface ListenerInterface
+ * @package Raylin666\EventDispatcher\Contracts
  */
-interface EventListenerInterface
+interface ListenerInterface
 {
     /**
-     * 设置事件
      * @param object $event
      * @return mixed
      */
-    public function setEvent(object $event);
-
-    /**
-     * 获取事件
-     * @return EventAbstract|null
-     */
-    public function getEvent(): ?EventAbstract;
+    public function process(object $event);
 }
