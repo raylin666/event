@@ -12,7 +12,6 @@
 namespace Raylin666\EventDispatcher;
 
 use InvalidArgumentException;
-use Raylin666\Core\Helper\ArrayHelper;
 use Raylin666\EventDispatcher\Contracts\EventInterface;
 use Raylin666\EventDispatcher\Contracts\ListenerProviderInterface;
 use Raylin666\EventDispatcher\Contracts\SubscriberInterface;
@@ -137,7 +136,7 @@ class ListenerProvider implements ListenerProviderInterface
      */
     public function delEvent(string $eventName)
     {
-        ArrayHelper::forget($this->listeners, $eventName);
+        unset($this->listeners[$eventName]);
     }
 
     /**
@@ -146,7 +145,7 @@ class ListenerProvider implements ListenerProviderInterface
      */
     public function getEventAllListeners(string $eventName): array
     {
-        return ArrayHelper::get($this->listeners, $eventName) ? : [];
+        return $this->listeners[$eventName] ?? [];
     }
 
     /**
