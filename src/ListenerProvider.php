@@ -13,6 +13,7 @@ namespace Raylin666\EventDispatcher;
 
 use InvalidArgumentException;
 use Raylin666\EventDispatcher\Contracts\EventInterface;
+use Raylin666\EventDispatcher\Contracts\EventRegisterInterface;
 use Raylin666\EventDispatcher\Contracts\ListenerProviderInterface;
 use Raylin666\EventDispatcher\Contracts\SubscriberInterface;
 use SplPriorityQueue;
@@ -52,7 +53,9 @@ class ListenerProvider implements ListenerProviderInterface
             && ($listeners = $this->getEventAllListeners($event->getName()))
         ) {
             foreach ($listeners as $listener) {
-                $queue->insert($listener->getListener(), $listener->getPriority());
+                if ($listener instanceof EventRegisterInterface) {
+                    $queue->insert($listener->getListener(), $listener->getPriority());
+                }
             }
         }
 
