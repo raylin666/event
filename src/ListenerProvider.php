@@ -12,10 +12,10 @@
 namespace Raylin666\EventDispatcher;
 
 use InvalidArgumentException;
-use Raylin666\EventDispatcher\Contracts\EventInterface;
-use Raylin666\EventDispatcher\Contracts\EventRegisterInterface;
-use Raylin666\EventDispatcher\Contracts\ListenerProviderInterface;
-use Raylin666\EventDispatcher\Contracts\SubscriberInterface;
+use Raylin666\Contract\EventInterface;
+use Raylin666\Contract\EventRegisterInterface;
+use Raylin666\Contract\ListenerProviderInterface;
+use Raylin666\Contract\SubscriberInterface;
 use SplPriorityQueue;
 use Closure;
 
@@ -50,7 +50,7 @@ class ListenerProvider implements ListenerProviderInterface
         $queue = new SplPriorityQueue();
 
         if (($event instanceof EventInterface)
-            && ($listeners = $this->getEventAllListeners($event->getName()))
+            && ($listeners = $this->getEventAllListeners($event->getEventAccessor()))
         ) {
             foreach ($listeners as $listener) {
                 if ($listener instanceof EventRegisterInterface) {
@@ -64,7 +64,7 @@ class ListenerProvider implements ListenerProviderInterface
 
     /**
      * @param string $event
-     * @param        $listener
+     * @param Closure|string|array|...  $listener
      * @param int    $priority
      * @return mixed|void
      */

@@ -21,12 +21,11 @@
     }
   ],
   "require": {
-    "php": ">=7.2.0",
+    "php": ">=7.2",
     "ext-swoole": ">=4.4.5",
     "ext-json": ">=1.0",
     "ext-openssl": ">=7.2",
-    "raylin666/container": "dev-master",
-    "psr/event-dispatcher": "^1.0"
+    "raylin666/contract": "dev-master"
   },
   "autoload": {
     "psr-4": {

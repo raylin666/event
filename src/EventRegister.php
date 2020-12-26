@@ -11,7 +11,7 @@
 
 namespace Raylin666\EventDispatcher;
 
-use Raylin666\EventDispatcher\Contracts\EventRegisterInterface;
+use Raylin666\Contract\EventRegisterInterface;
 
 /**
  * Class EventRegister

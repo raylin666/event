@@ -12,7 +12,7 @@
 namespace Raylin666\EventDispatcher;
 
 use Psr\EventDispatcher\StoppableEventInterface;
-use Raylin666\EventDispatcher\Contracts\EventInterface;
+use Raylin666\Contract\EventInterface;
 use Serializable;
 
 /**
@@ -21,16 +21,6 @@ use Serializable;
  */
 abstract class Event implements EventInterface, StoppableEventInterface, Serializable
 {
-    /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        // TODO: Implement getName() method.
-
-        return static::class;
-    }
-
     /**
      * @return bool
      */

@@ -11,27 +11,41 @@
 
 namespace Raylin666\EventDispatcher;
 
-use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
-use Raylin666\EventDispatcher\Contracts\ListenerProviderInterface;
+use Raylin666\Contract\FactoryInterface;
+use Psr\Container\ContainerInterface;
+use Raylin666\Contract\ListenerProviderInterface;
 
 /**
  * Class EventDispatcherFactory
  * @package Raylin666\EventDispatcher
  */
-class EventDispatcherFactory
+class EventDispatcherFactory implements FactoryInterface
 {
     /**
-     * @param ContainerInterface $container
-     * @param string             $eventDispatcher
-     * @return EventDispatcherInterface
+     * @var ContainerInterface
      */
-    public function __invoke(ContainerInterface $container, string $eventDispatcher = EventDispatcher::class): EventDispatcherInterface
+    protected $container;
+
+    /**
+     * @param ContainerInterface $container
+     * @return FactoryInterface
+     */
+    public function __invoke(ContainerInterface $container): FactoryInterface
     {
         // TODO: Implement __invoke() method.
 
-        return new $eventDispatcher(
-            $container->get(ListenerProviderInterface::class)
+        $this->container = $container;
+        return $this;
+    }
+
+    /**
+     * @return EventDispatcherInterface
+     */
+    public function make(): EventDispatcherInterface
+    {
+        return new EventDispatcher(
+            $this->container->get(ListenerProviderInterface::class)
         );
     }
 }

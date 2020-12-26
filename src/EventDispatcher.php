@@ -11,12 +11,11 @@
 
 namespace Raylin666\EventDispatcher;
 
-use Psr\EventDispatcher\EventDispatcherInterface;
-use Raylin666\EventDispatcher\Contracts\EventInterface;
-use Raylin666\EventDispatcher\Contracts\ListenerInterface;
-use Raylin666\EventDispatcher\Contracts\ListenerProviderInterface;
-use Psr\EventDispatcher\StoppableEventInterface;
 use TypeError;
+use Raylin666\Contract\EventInterface;
+use Psr\EventDispatcher\EventDispatcherInterface;
+use Raylin666\Contract\ListenerProviderInterface;
+use Psr\EventDispatcher\StoppableEventInterface;
 
 /**
  * Class EventDispatcher
@@ -55,7 +54,7 @@ class EventDispatcher implements EventDispatcherInterface
         // TODO: Implement dispatch() method.
 
         if (!$event instanceof EventInterface) {
-            throw new TypeError('The named event must implement \Raylin666\Event\Contracts\EventInterface.');
+            throw new TypeError('The named event must implement \Raylin666\Contract\EventInterface.');
         }
 
         if ($this->isEventPropagationStopped($event)) {
@@ -84,13 +83,6 @@ class EventDispatcher implements EventDispatcherInterface
                 }
 
                 continue ;
-            }
-
-            if (is_string($listener) && class_exists($listener)) {
-                $class = new $listener;
-                if ($class instanceof ListenerInterface) {
-                    $class->process($event);
-                }
             }
         }
 

@@ -32,153 +32,120 @@ composer require "raylin666/event-dispatcher"
 
 require_once 'vendor/autoload.php';
 
-class onStart1
-{
-    public function event1()
-    {
-        echo 'onStart1-event1' . PHP_EOL;
-    }
+require_once 'vendor/autoload.php';
 
-    public function event2($event, $name, $callback)
-    {
-        echo $name . $callback();
-    }
-}
+$container = new \Raylin666\Container\Container();
 
-class onStart2
-{
-    public function __construct($name)
-    {
-        $this->name = $name;
-    }
+$container->singleton(\Raylin666\Contract\ListenerProviderInterface::class, \Raylin666\EventDispatcher\ListenerProvider::class);
 
-    public function getName()
-    {
-        echo $this->name . PHP_EOL;
-    }
-}
-
-class Listener implements \Raylin666\EventDispatcher\Contracts\ListenerInterface
-{
-    public function process(object $event)
-    {
-        // TODO: Implement process() method.
-
-        echo 'Listener-process' . PHP_EOL;
-    }
-}
-
-$container = new Raylin666\Container\Container();
-$listenerProvider = new \Raylin666\EventDispatcher\ListenerProvider();
-$container->add(\Raylin666\EventDispatcher\Contracts\ListenerProviderInterface::class, $listenerProvider);
-$eventDispatcherFactory = new \Raylin666\EventDispatcher\EventDispatcherFactory;
-$listenerProvider = $container->get(\Raylin666\EventDispatcher\Contracts\ListenerProviderInterface::class);
-$eventDispatcher = $eventDispatcherFactory($container);
-
-$onStart1 = new onStart1();
-$onStart2 = new onStart2('hello world');
-
-$listenerProvider->addListener('onStart', [$onStart1, 'event1'], 2);
-$listenerProvider->addListener('onStart', [$onStart1, 'event2', ['hei raylin', function () {
-    echo 'event2 callback' . PHP_EOL;
-}]], 3);
-$listenerProvider->addListener('onStart', [$onStart2, 'getName'], 1);
-$listenerProvider->addListener('onStart', function ($event) {
-    echo $event->getName() . PHP_EOL;
+$container->singleton(\Psr\EventDispatcher\EventDispatcherInterface::class, function ($container) {
+   return (new \Raylin666\EventDispatcher\EventDispatcherFactory())($container)->make();
 });
-$listenerProvider->addListener('onStart', Listener::class);
 
 class onStartEvent extends \Raylin666\EventDispatcher\Event
 {
-    public function getName(): string
+    public function getEventAccessor(): string
     {
-        // TODO: Implement getName() method.
+        // TODO: Implement getEventAccessor() method.
 
         return 'onStart';
     }
 
     public function isPropagationStopped(): bool
     {
-        // TODO: Implement isPropagationStopped() method.
-
-        return false;
+        return false;   // 为 true 时, 不执行该事件绑定的所有监听
     }
 }
 
-$onStartEvent = new onStartEvent();
+class onStartListener
+{
+    public function init()
+    {
+        var_dump('onStart 监听开始');
+    }
+}
 
-$eventDispatcher->dispatch($onStartEvent);
+class onStartTwoListener
+{
+    public static function end($event, $name, callable $callback)
+    {
+        var_dump($event, $name, call($callback));
+    }
+}
+
+$container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addListener('onStart', ['onStartListener', 'init']);
+$container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addListener('onStart', ['onStartTwoListener', 'end', ['onStart', function () {
+    return strval(123456);
+}]]);
+
+$container->get(\Psr\EventDispatcher\EventDispatcherInterface::class)->dispatch(new onStartEvent());
 
 //  输出
 /*
-event2 callback
-hei raylinonStart1-event1
-onStart
-hello world
-Listener-process
+string(20) "onStart 监听开始"
+object(onStartEvent)#12 (0) {
+}
+string(7) "onStart"
+string(6) "123456"
 */
 
 
 ### 订阅器 [订阅器(Subscriber)实际上是对 ListenerProvider::addListener 的一种装饰]
-    /* 利用 ListenerProvider::addListener 添加事件和监听器的关系，这种方式比较过程化，
-        也无法体现出一组事件之间的关系，所以在实践中往往会提出“订阅器”的概念*/
+    /* 
+        利用 ListenerProvider::addListener 添加事件和监听器的关系，这种方式比较过程化，
+        也无法体现出一组事件之间的关系，所以在实践中往往会提出“订阅器”的概念
+    */
 
-class onStartSubscriber implements \Raylin666\EventDispatcher\Contracts\SubscriberInterface
+class onStartSubscriber implements \Raylin666\Contract\SubscriberInterface
 {
     public function subscribe(Closure $subscriber)
     {
         // TODO: Implement subscribe() method.
 
         $subscriber(
-            'swoole.onstart',
-            'swooleEvent1',
-            ['swooleEvent2', 2]
+            'onStart',
+            'onStartListener',
+            'onStartTwoListener'
         );
     }
 
-    public function swooleEvent1(\Raylin666\EventDispatcher\Contracts\EventInterface $event)
+    public function onStartListener()
     {
-        echo 'swooleEvent1' . PHP_EOL;
+        return (new onStartListener())->init();
     }
 
-    public function swooleEvent2(\Raylin666\EventDispatcher\Contracts\EventInterface $event)
+    public function onStartTwoListener($event)
     {
-        echo 'swooleEvent2' . PHP_EOL;
-    }
-}
-
-$listenerProvider->addSubscriber(new onStartSubscriber());
-
-class swooleOnStartEvent extends \Raylin666\EventDispatcher\Event
-{
-    public function getName(): string
-    {
-        // TODO: Implement getName() method.
-
-        return 'swoole.onstart';
+        return onStartTwoListener::end($event, 'enen', function () {
+            return 'haha';
+        });
     }
 }
 
-$swooleOnStartEvent = new swooleOnStartEvent();
+/*
+ * 相当于上述的:
+ * $container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addListener('onStart', ['onStartListener', 'init']);
+   $container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addListener('onStart', ['onStartTwoListener', 'end', ['onStart', function () {
+       return strval(123456);
+   }]]);
+   包装体
+ * */
+$container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addSubscriber(new onStartSubscriber());
 
-$eventDispatcher->dispatch($swooleOnStartEvent);
+$container->get(\Psr\EventDispatcher\EventDispatcherInterface::class)->dispatch(new onStartEvent());
 
 //  输出
 /*
-event2 callback
-hei raylinonStart1-event1
-onStart
-hello world
-Listener-process
-swooleEvent2
-swooleEvent1
+string(20) "onStart 监听开始"
+object(onStartEvent)#11 (0) {
+}
+string(4) "enen"
+string(4) "haha"
 */
-
-?>
 
 ```
 
-## 更新日志
+### 更新日志
 
 请查看 [CHANGELOG.md](CHANGELOG.md)
 
