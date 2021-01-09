@@ -11,6 +11,7 @@
 
 namespace Raylin666\Event;
 
+use ReflectionClass;
 use Psr\Container\ContainerInterface;
 use Raylin666\Contract\EventDispatcherInterface;
 use Raylin666\Contract\ListenerProviderInterface;
@@ -45,12 +46,57 @@ class EventFactory implements EventFactoryInterface
         // TODO: Implement __construct() method.
 
         $this->container = $container;
+
         $this->listener = $container->get(ListenerProviderInterface::class);
+
         $this->dispatcher = make(
             EventDispatcherInterface::class,
             [
                 'listenerProvider'  =>  $this->listener
             ]
         );
+    }
+
+    /**
+     * 获取事件监听器
+     * @return ListenerProviderInterface
+     */
+    public function listener(): ListenerProviderInterface
+    {
+        // TODO: Implement listener() method.
+
+        return $this->listener;
+    }
+
+    /**
+     * 获取事件发布器
+     * @return EventDispatcherInterface
+     */
+    public function dispatcher(): EventDispatcherInterface
+    {
+        // TODO: Implement dispatcher() method.
+
+        return $this->dispatcher;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return mixed
+     * @throws \ReflectionException
+     */
+    public function __call($name, $arguments)
+    {
+        // TODO: Implement __call() method.
+
+        $eventDispatcher = new ReflectionClass(EventDispatcherInterface::class);
+        if ($eventDispatcher->hasMethod($name)) {
+            return $this->dispatcher->$name(...$arguments);
+        }
+
+        $listenerProvider = new ReflectionClass(ListenerProviderInterface::class);
+        if ($listenerProvider->hasMethod($name)) {
+            return $this->listener->$name(...$arguments);
+        }
     }
 }

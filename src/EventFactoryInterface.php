@@ -12,6 +12,8 @@
 namespace Raylin666\Event;
 
 use Raylin666\Contract\FactoryInterface;
+use Raylin666\Contract\EventDispatcherInterface;
+use Raylin666\Contract\ListenerProviderInterface;
 
 /**
  * Interface EventFactoryInterface
@@ -19,4 +21,13 @@ use Raylin666\Contract\FactoryInterface;
  */
 interface EventFactoryInterface extends FactoryInterface
 {
+    /**
+     * @return ListenerProviderInterface
+     */
+    public function listener(): ListenerProviderInterface;
+
+    /**
+     * @return EventDispatcherInterface
+     */
+    public function dispatcher(): EventDispatcherInterface;
 }

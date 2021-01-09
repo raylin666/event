@@ -9,13 +9,13 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\EventDispatcher;
+namespace Raylin666\Event;
 
 use Raylin666\Contract\EventRegisterInterface;
 
 /**
  * Class EventRegister
- * @package Raylin666\EventDispatcher
+ * @package Raylin666\Event
  */
 class EventRegister implements EventRegisterInterface
 {

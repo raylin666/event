@@ -34,14 +34,16 @@ require_once 'vendor/autoload.php';
 
 $container = new \Raylin666\Container\Container();
 
-$container->singleton(\Raylin666\Contract\ListenerProviderInterface::class, \Raylin666\EventDispatcher\ListenerProvider::class);
+\Raylin666\Util\ApplicationContext::setContainer($container);
 
-$container->singleton(\Psr\EventDispatcher\EventDispatcherInterface::class, function ($container) {
-    $factory = new \Raylin666\EventDispatcher\EventDispatcherFactory;
-    return $factory($container)->make();
-});
+// 注册事件监听器
+$container->bind(\Raylin666\Contract\ListenerProviderInterface::class, \Raylin666\Event\ListenerProvider::class);
+// 注册事件发布器
+$container->bind(\Raylin666\Contract\EventDispatcherInterface::class, \Raylin666\Event\Dispatcher::class);
+// 注册事件工厂
+$container->singleton(\Raylin666\Event\EventFactoryInterface::class, \Raylin666\Event\EventFactory::class);
 
-class onStartEvent extends \Raylin666\EventDispatcher\Event
+class onStartEvent extends \Raylin666\Event\Event
 {
     public function getEventAccessor(): string
     {
@@ -72,12 +74,13 @@ class onStartTwoListener
     }
 }
 
-$container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addListener('onStart', ['onStartListener', 'init']);
-$container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addListener('onStart', ['onStartTwoListener', 'end', ['onStart', function () {
+// 事件注册
+$container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addListener('onStart', ['onStartListener', 'init']);
+$container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addListener('onStart', ['onStartTwoListener', 'end', ['onStart', function () {
     return strval(123456);
 }]]);
-
-$container->get(\Psr\EventDispatcher\EventDispatcherInterface::class)->dispatch(new onStartEvent());
+// 事件发布
+$container->get(\Raylin666\Event\EventFactoryInterface::class)->dispatcher()->dispatch(new onStartEvent());
 
 //  输出
 /*
@@ -123,15 +126,21 @@ class onStartSubscriber implements \Raylin666\Contract\SubscriberInterface
 
 /*
  * 相当于上述的:
- * $container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addListener('onStart', ['onStartListener', 'init']);
-   $container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addListener('onStart', ['onStartTwoListener', 'end', ['onStart', function () {
+ * $container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addListener('onStart', ['onStartListener', 'init']);
+   $container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addListener('onStart', ['onStartTwoListener', 'end', ['onStart', function () {
        return strval(123456);
    }]]);
    包装体
  * */
-$container->get(\Raylin666\Contract\ListenerProviderInterface::class)->addSubscriber(new onStartSubscriber());
-
-$container->get(\Psr\EventDispatcher\EventDispatcherInterface::class)->dispatch(new onStartEvent());
+$container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addSubscriber(new onStartSubscriber());
+$container->get(\Raylin666\Event\EventFactoryInterface::class)->dispatcher()->dispatch(new onStartEvent());
+/**
+* 也支持：
+* $container->get(\Raylin666\Event\EventFactoryInterface::class)->addSubscriber(new onStartSubscriber());
+  $container->get(\Raylin666\Event\EventFactoryInterface::class)->dispatch(new onStartEvent());
+ * 
+ * 因为 EventFactoryInterface 实现了 __call 方法
+ */
 
 //  输出
 /*

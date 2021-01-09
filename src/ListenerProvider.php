@@ -16,7 +16,6 @@ use Raylin666\Contract\EventInterface;
 use Raylin666\Contract\EventRegisterInterface;
 use Raylin666\Contract\ListenerProviderInterface;
 use Raylin666\Contract\SubscriberInterface;
-use Raylin666\EventDispatcher\EventRegister;
 use SplPriorityQueue;
 use Closure;
 
