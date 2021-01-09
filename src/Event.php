@@ -9,7 +9,7 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\EventDispatcher;
+namespace Raylin666\Event;
 
 use Psr\EventDispatcher\StoppableEventInterface;
 use Raylin666\Contract\EventInterface;
@@ -17,7 +17,7 @@ use Serializable;
 
 /**
  * Class Event
- * @package Raylin666\EventDispatcher
+ * @package Raylin666\Event
  */
 abstract class Event implements EventInterface, StoppableEventInterface, Serializable
 {

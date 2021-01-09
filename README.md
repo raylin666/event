@@ -1,7 +1,7 @@
 # PSR-14 事件派发与监听器
 
-[![GitHub release](https://img.shields.io/github/release/raylin666/event-dispatcher.svg)](https://github.com/raylin666/event-dispatcher/releases)
-[![PHP version](https://img.shields.io/badge/php-%3E%207-orange.svg)](https://github.com/php/php-src)
+[![GitHub release](https://img.shields.io/github/release/raylin666/event.svg)](https://github.com/raylin666/event/releases)
+[![PHP version](https://img.shields.io/badge/php-%3E%207.2-orange.svg)](https://github.com/php/php-src)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](#LICENSE)
 
 ### 环境要求
@@ -11,19 +11,19 @@
 ### 安装说明
 
 ```
-composer require "raylin666/event-dispatcher"
+composer require "raylin666/event"
 ```
 
 ### 使用方式
 
-#### event-dispatcher 是一个事件派发系统。它派发一个事件，并以优先级顺序调用预先定义的事件处理程序。
+#### event 是一个事件派发系统。它派发一个事件，并以优先级顺序调用预先定义的事件处理程序。
 
 事件系统由以下5个概念构成：
 
     事件 (Event): Event 是事件信息的载体，它往往围绕一个动作进行描述，例如 “用户被创建了”、“准备导出 excel 文件” 等等，Event 的内部需要包含当前事件的所有信息，以便后续的处理程序使用。
     监听器 (Listener): Listener 是事件处理程序，负责在发生某一事件(Event)时执行特定的操作。
     Listener Provider: 它负责将事件(Event)与监听器(Listener)进行关联，在触发一个事件时，Listener Provider 需要提供绑定在该事件上的所有监听器。
-    派发器 (EventDispatcher): 负责通知某一事件发生了。我们所说的“向某一目标派发一个事件”，这里的“目标”指的是 Listener Provider，也就是说，EventDispatcher 向 Listener Provider 派发了 Event。
+    派发器 (Dispatcher): 负责通知某一事件发生了。我们所说的“向某一目标派发一个事件”，这里的“目标”指的是 Listener Provider，也就是说，Dispatcher 向 Listener Provider 派发了 Event。
     订阅器 (Subscriber): 订阅器是 Listener Provider 的扩展，它可以将不同的事件和订阅器里的方法进行自由绑定，这些操作都在订阅器内部进行，这样可以将同类事件的绑定与处理内聚，便于管理。
 
 ```php
@@ -32,14 +32,13 @@ composer require "raylin666/event-dispatcher"
 
 require_once 'vendor/autoload.php';
 
-require_once 'vendor/autoload.php';
-
 $container = new \Raylin666\Container\Container();
 
 $container->singleton(\Raylin666\Contract\ListenerProviderInterface::class, \Raylin666\EventDispatcher\ListenerProvider::class);
 
 $container->singleton(\Psr\EventDispatcher\EventDispatcherInterface::class, function ($container) {
-   return (new \Raylin666\EventDispatcher\EventDispatcherFactory())($container)->make();
+    $factory = new \Raylin666\EventDispatcher\EventDispatcherFactory;
+    return $factory($container)->make();
 });
 
 class onStartEvent extends \Raylin666\EventDispatcher\Event

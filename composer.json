@@ -1,5 +1,5 @@
 {
-  "name": "raylin666/event-dispatcher",
+  "name": "raylin666/event",
   "type": "library",
   "description": "An event dispatching system with PSR-14.",
   "keywords" : [
@@ -12,7 +12,7 @@
     "psr-14",
     "event-dispacher"
   ],
-  "homepage": "https://github.com/raylin666/event-dispatcher",
+  "homepage": "https://github.com/raylin666/event",
   "license" : "Apache-2.0",
   "authors": [
     {
@@ -25,16 +25,16 @@
     "ext-swoole": ">=4.4.5",
     "ext-json": ">=1.0",
     "ext-openssl": ">=7.2",
-    "raylin666/contract": "dev-master"
+    "raylin666/util": "^1.0"
   },
   "autoload": {
     "psr-4": {
-      "Raylin666\\EventDispatcher\\": "src/"
+      "Raylin666\\Event\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Raylin666\\EventDispatcher\\Tests\\": "tests/"
+      "Raylin666\\Event\\Tests\\": "tests/"
     }
   },
   "extra": {},

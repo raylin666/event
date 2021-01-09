@@ -9,19 +9,19 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\EventDispatcher;
+namespace Raylin666\Event;
 
 use TypeError;
 use Raylin666\Contract\EventInterface;
-use Psr\EventDispatcher\EventDispatcherInterface;
+use Raylin666\Contract\EventDispatcherInterface;
 use Raylin666\Contract\ListenerProviderInterface;
 use Psr\EventDispatcher\StoppableEventInterface;
 
 /**
- * Class EventDispatcher
- * @package Raylin666\EventDispatcher
+ * Class Dispatcher
+ * @package Raylin666\Event
  */
-class EventDispatcher implements EventDispatcherInterface
+class Dispatcher implements EventDispatcherInterface
 {
     /**
      * @var ListenerProviderInterface
@@ -29,7 +29,7 @@ class EventDispatcher implements EventDispatcherInterface
     protected $listenerProvider;
 
     /**
-     * EventDispatcher constructor.
+     * Dispatcher constructor.
      * @param ListenerProviderInterface $listenerProvider
      */
     public function __construct(ListenerProviderInterface $listenerProvider)

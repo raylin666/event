@@ -9,19 +9,20 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\EventDispatcher;
+namespace Raylin666\Event;
 
 use InvalidArgumentException;
 use Raylin666\Contract\EventInterface;
 use Raylin666\Contract\EventRegisterInterface;
 use Raylin666\Contract\ListenerProviderInterface;
 use Raylin666\Contract\SubscriberInterface;
+use Raylin666\EventDispatcher\EventRegister;
 use SplPriorityQueue;
 use Closure;
 
 /**
  * Class ListenerProvider
- * @package Raylin666\EventDispatcher
+ * @package Raylin666\Event
  */
 class ListenerProvider implements ListenerProviderInterface
 {
@@ -72,7 +73,14 @@ class ListenerProvider implements ListenerProviderInterface
     {
         // TODO: Implement addListener() method.
 
-        $this->listeners[$event][] = new EventRegister($event, $listener, $priority);
+        $this->listeners[$event][] = make(
+            EventRegister::class,
+            [
+                'event'     =>  $event,
+                'listener'  =>  $listener,
+                'priority'  =>  $priority
+            ]
+        );
     }
 
     /**

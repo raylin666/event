@@ -9,18 +9,17 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\EventDispatcher;
+namespace Raylin666\Event;
 
-use Psr\EventDispatcher\EventDispatcherInterface;
-use Raylin666\Contract\FactoryInterface;
 use Psr\Container\ContainerInterface;
+use Raylin666\Contract\EventDispatcherInterface;
 use Raylin666\Contract\ListenerProviderInterface;
 
 /**
- * Class EventDispatcherFactory
- * @package Raylin666\EventDispatcher
+ * Class EventFactory
+ * @package Raylin666\Event
  */
-class EventDispatcherFactory implements FactoryInterface
+class EventFactory implements EventFactoryInterface
 {
     /**
      * @var ContainerInterface
@@ -28,24 +27,30 @@ class EventDispatcherFactory implements FactoryInterface
     protected $container;
 
     /**
-     * @param ContainerInterface $container
-     * @return FactoryInterface
+     * @var ListenerProviderInterface
      */
-    public function __invoke(ContainerInterface $container): FactoryInterface
-    {
-        // TODO: Implement __invoke() method.
-
-        $this->container = $container;
-        return $this;
-    }
+    protected $listener;
 
     /**
-     * @return EventDispatcherInterface
+     * @var EventDispatcherInterface
      */
-    public function make(): EventDispatcherInterface
+    protected $dispatcher;
+
+    /**
+     * EventFactory constructor.
+     * @param ContainerInterface $container
+     */
+    public function __construct(ContainerInterface $container)
     {
-        return new EventDispatcher(
-            $this->container->get(ListenerProviderInterface::class)
+        // TODO: Implement __construct() method.
+
+        $this->container = $container;
+        $this->listener = $container->get(ListenerProviderInterface::class);
+        $this->dispatcher = make(
+            EventDispatcherInterface::class,
+            [
+                'listenerProvider'  =>  $this->listener
+            ]
         );
     }
 }
