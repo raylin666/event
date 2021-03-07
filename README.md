@@ -1,6 +1,6 @@
 # PSR-14 事件派发与监听器
 
-[![GitHub release](https://img.shields.io/github/release/raylin666/event.svg)](https://github.com/raylin666/event/releases)
+[![GitHub release](https://img.shields.io/github/release/raylin666/event-dispatcher.svg)](https://github.com/raylin666/event-dispatcher/releases)
 [![PHP version](https://img.shields.io/badge/php-%3E%207.2-orange.svg)](https://github.com/php/php-src)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](#LICENSE)
 
@@ -11,7 +11,7 @@
 ### 安装说明
 
 ```
-composer require "raylin666/event"
+composer require "raylin666/event-dispatcher"
 ```
 
 ### 使用方式
@@ -30,20 +30,59 @@ composer require "raylin666/event"
 
 <?php
 
-require_once 'vendor/autoload.php';
+require 'vendor/autoload.php';
 
-$container = new \Raylin666\Container\Container();
+$eventDispatcher = new \Raylin666\EventDispatcher\Dispatcher;
 
-\Raylin666\Util\ApplicationContext::setContainer($container);
+$listenerProvider = new \Raylin666\EventDispatcher\ListenerProvider();
 
-// 注册事件监听器
-$container->bind(\Raylin666\Contract\ListenerProviderInterface::class, \Raylin666\Event\ListenerProvider::class);
-// 注册事件发布器
-$container->bind(\Raylin666\Contract\EventDispatcherInterface::class, \Raylin666\Event\Dispatcher::class);
-// 注册事件工厂
-$container->singleton(\Raylin666\Event\EventFactoryInterface::class, \Raylin666\Event\EventFactory::class);
+$eventDispatcher($listenerProvider);
 
-class onStartEvent extends \Raylin666\Event\Event
+$listenerProvider->addListener('lang', function () {
+    echo "golang \n";
+});
+
+$listenerProvider->addListener('lang', function () {
+    echo "php \n";
+}, 2);
+
+$listenerProvider->addListener('lang', function () {
+    echo "java \n";
+});
+
+class LangEvent extends \Raylin666\EventDispatcher\Event
+{
+    public function getEventAccessor(): string
+    {
+        // TODO: Implement getEventAccessor() method.
+
+        return 'lang';
+    }
+
+    public function isPropagationStopped(): bool
+    {
+        // 事件是否需要执行, 为 true 时 不执行该事件绑定的所有监听
+        return false;
+    }
+}
+
+$eventDispatcher->dispatch(new LangEvent());
+
+//  输出
+/*
+    php 
+    java 
+    golang 
+*/
+
+
+### 订阅器 [订阅器(Subscriber)实际上是对 ListenerProvider::addListener 的一种装饰]
+    /* 
+        利用 ListenerProvider::addListener 添加事件和监听器的关系，这种方式比较过程化，
+        也无法体现出一组事件之间的关系，所以在实践中往往会提出“订阅器”的概念
+    */
+
+class OnStartEvent extends \Raylin666\EventDispatcher\Event
 {
     public function getEventAccessor(): string
     {
@@ -54,51 +93,12 @@ class onStartEvent extends \Raylin666\Event\Event
 
     public function isPropagationStopped(): bool
     {
-        return false;   // 为 true 时, 不执行该事件绑定的所有监听
+        // 事件是否需要执行, 为 true 时 不执行该事件绑定的所有监听
+        return false;
     }
 }
 
-class onStartListener
-{
-    public function init()
-    {
-        var_dump('onStart 监听开始');
-    }
-}
-
-class onStartTwoListener
-{
-    public static function end($event, $name, callable $callback)
-    {
-        var_dump($event, $name, call($callback));
-    }
-}
-
-// 事件注册
-$container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addListener('onStart', ['onStartListener', 'init']);
-$container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addListener('onStart', ['onStartTwoListener', 'end', ['onStart', function () {
-    return strval(123456);
-}]]);
-// 事件发布
-$container->get(\Raylin666\Event\EventFactoryInterface::class)->dispatcher()->dispatch(new onStartEvent());
-
-//  输出
-/*
-string(20) "onStart 监听开始"
-object(onStartEvent)#12 (0) {
-}
-string(7) "onStart"
-string(6) "123456"
-*/
-
-
-### 订阅器 [订阅器(Subscriber)实际上是对 ListenerProvider::addListener 的一种装饰]
-    /* 
-        利用 ListenerProvider::addListener 添加事件和监听器的关系，这种方式比较过程化，
-        也无法体现出一组事件之间的关系，所以在实践中往往会提出“订阅器”的概念
-    */
-
-class onStartSubscriber implements \Raylin666\Contract\SubscriberInterface
+class OnStartSubscriber implements \Raylin666\Contract\SubscriberInterface
 {
     public function subscribe(Closure $subscriber)
     {
@@ -113,42 +113,27 @@ class onStartSubscriber implements \Raylin666\Contract\SubscriberInterface
 
     public function onStartListener()
     {
-        return (new onStartListener())->init();
+        echo "我是开始监听事件 1 \n";
     }
 
-    public function onStartTwoListener($event)
+    public function onStartTwoListener(OnStartEvent $event)
     {
-        return onStartTwoListener::end($event, 'enen', function () {
-            return 'haha';
-        });
+        return call_user_func_array(function (OnStartEvent $event, $writeString) {
+            var_dump($event->getEventAccessor());
+            var_dump($writeString);
+        }, [$event, "我是开始监听事件 2"]);
     }
 }
 
-/*
- * 相当于上述的:
- * $container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addListener('onStart', ['onStartListener', 'init']);
-   $container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addListener('onStart', ['onStartTwoListener', 'end', ['onStart', function () {
-       return strval(123456);
-   }]]);
-   包装体
- * */
-$container->get(\Raylin666\Event\EventFactoryInterface::class)->listener()->addSubscriber(new onStartSubscriber());
-$container->get(\Raylin666\Event\EventFactoryInterface::class)->dispatcher()->dispatch(new onStartEvent());
-/**
-* 也支持：
-* $container->get(\Raylin666\Event\EventFactoryInterface::class)->addSubscriber(new onStartSubscriber());
-  $container->get(\Raylin666\Event\EventFactoryInterface::class)->dispatch(new onStartEvent());
- * 
- * 因为 EventFactoryInterface 实现了 __call 方法
- */
+$listenerProvider->addSubscriber(new OnStartSubscriber());
+
+$eventDispatcher->dispatch(new OnStartEvent());
 
 //  输出
 /*
-string(20) "onStart 监听开始"
-object(onStartEvent)#11 (0) {
-}
-string(4) "enen"
-string(4) "haha"
+    我是开始监听事件 1 
+    string(7) "onStart"
+    string(26) "我是开始监听事件 2"
 */
 
 ```

@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 // +----------------------------------------------------------------------
 // | Created by linshan. 版权所有 @
 // +----------------------------------------------------------------------
@@ -9,19 +9,19 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\Event;
+namespace Raylin666\EventDispatcher;
 
+use Closure;
+use SplPriorityQueue;
 use InvalidArgumentException;
 use Raylin666\Contract\EventInterface;
 use Raylin666\Contract\EventRegisterInterface;
 use Raylin666\Contract\ListenerProviderInterface;
 use Raylin666\Contract\SubscriberInterface;
-use SplPriorityQueue;
-use Closure;
 
 /**
  * Class ListenerProvider
- * @package Raylin666\Event
+ * @package Raylin666\EventDispatcher
  */
 class ListenerProvider implements ListenerProviderInterface
 {
@@ -29,14 +29,6 @@ class ListenerProvider implements ListenerProviderInterface
      * @var EventRegister[]
      */
     protected $listeners = [];
-
-    /**
-     * @return EventRegister[]
-     */
-    public function getListeners(): array
-    {
-        return $this->listeners;
-    }
 
     /**
      * @param object $event
@@ -50,7 +42,7 @@ class ListenerProvider implements ListenerProviderInterface
         $queue = new SplPriorityQueue();
 
         if (($event instanceof EventInterface)
-            && ($listeners = $this->getEventAllListeners($event->getEventAccessor()))
+            && ($listeners = $this->getEventListener($event->getEventAccessor()))
         ) {
             foreach ($listeners as $listener) {
                 if ($listener instanceof EventRegisterInterface) {
@@ -60,38 +52,6 @@ class ListenerProvider implements ListenerProviderInterface
         }
 
         return $queue;
-    }
-
-    /**
-     * @param string $event
-     * @param Closure|string|array|...  $listener
-     * @param int    $priority
-     * @return mixed|void
-     */
-    public function addListener(string $event, $listener, int $priority = 1)
-    {
-        // TODO: Implement addListener() method.
-
-        $this->listeners[$event][] = make(
-            EventRegister::class,
-            [
-                'event'     =>  $event,
-                'listener'  =>  $listener,
-                'priority'  =>  $priority
-            ]
-        );
-    }
-
-    /**
-     * @param SubscriberInterface $subscriber
-     * @return mixed|void
-     */
-    public function addSubscriber(SubscriberInterface $subscriber)
-    {
-        // TODO: Implement addSubscriber() method.
-
-        $closure = $this->getSubscriberRegister($subscriber);
-        $subscriber->subscribe($closure);
     }
 
     /**
@@ -125,43 +85,77 @@ class ListenerProvider implements ListenerProviderInterface
     }
 
     /**
-     * @return array
+     * 添加监听
+     * @param string $event
+     * @param        $listener
+     * @param int    $priority
+     * @return mixed|void
      */
-    public function getEventNames(): array
+    public function addListener(string $event, $listener, int $priority = 1)
     {
-        return array_keys($this->listeners);
+        // TODO: Implement addListener() method.
+
+        $this->listeners[$event][] = make(
+            EventRegister::class,
+            [
+                'event'     =>  $event,
+                'listener'  =>  $listener,
+                'priority'  =>  $priority
+            ]
+        );
     }
 
     /**
-     * @param string $eventName
+     * 添加订阅
+     * @param SubscriberInterface $subscriber
+     * @return mixed|void
+     */
+    public function addSubscriber(SubscriberInterface $subscriber)
+    {
+        // TODO: Implement addSubscriber() method.
+
+        $closure = $this->getSubscriberRegister($subscriber);
+        $subscriber->subscribe($closure);
+    }
+
+    /**
+     * @return EventRegister[]
+     */
+    public function getEventListeners(): array
+    {
+        return $this->listeners;
+    }
+
+    /**
+     * @param string $event
+     * @return array
+     */
+    public function getEventListener(string $event): array
+    {
+        return $this->listeners[$event] ?? [];
+    }
+
+    /**
+     * @param string $event
      * @return bool
      */
-    public function hasEvent(string $eventName): bool
+    public function hasEventListener(string $event): bool
     {
-        return array_key_exists($eventName, $this->listeners);
+        return array_key_exists($event, $this->listeners);
     }
 
     /**
-     * @param string $eventName
+     * @param string $event
      */
-    public function delEvent(string $eventName)
+    public function deleteEventListener(string $event)
     {
-        unset($this->listeners[$eventName]);
-    }
-
-    /**
-     * @param string $eventName
-     * @return array
-     */
-    public function getEventAllListeners(string $eventName): array
-    {
-        return $this->listeners[$eventName] ?? [];
+        unset($this->listeners[$event]);
     }
 
     /**
      * Clear All Listeners
      */
-    public function clearAllListeners()
+    public function clearEventListeners()
     {
         $this->listeners = [];
     }

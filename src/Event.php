@@ -9,7 +9,7 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\Event;
+namespace Raylin666\EventDispatcher;
 
 use Psr\EventDispatcher\StoppableEventInterface;
 use Raylin666\Contract\EventInterface;
@@ -17,11 +17,12 @@ use Serializable;
 
 /**
  * Class Event
- * @package Raylin666\Event
+ * @package Raylin666\EventDispatcher
  */
 abstract class Event implements EventInterface, StoppableEventInterface, Serializable
 {
     /**
+     * 事件是否需要执行, 为 true 时 不执行该事件绑定的所有监听
      * @return bool
      */
     public function isPropagationStopped(): bool

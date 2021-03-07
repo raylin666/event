@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 // +----------------------------------------------------------------------
 // | Created by linshan. 版权所有 @
 // +----------------------------------------------------------------------
@@ -9,9 +9,10 @@
 // | Author: kaka梦很美 <1099013371@qq.com>
 // +----------------------------------------------------------------------
 
-namespace Raylin666\Event;
+namespace Raylin666\EventDispatcher;
 
 use TypeError;
+use Exception;
 use Raylin666\Contract\EventInterface;
 use Raylin666\Contract\EventDispatcherInterface;
 use Raylin666\Contract\ListenerProviderInterface;
@@ -19,7 +20,7 @@ use Psr\EventDispatcher\StoppableEventInterface;
 
 /**
  * Class Dispatcher
- * @package Raylin666\Event
+ * @package Raylin666\EventDispatcher
  */
 class Dispatcher implements EventDispatcherInterface
 {
@@ -32,7 +33,7 @@ class Dispatcher implements EventDispatcherInterface
      * Dispatcher constructor.
      * @param ListenerProviderInterface $listenerProvider
      */
-    public function __construct(ListenerProviderInterface $listenerProvider)
+    public function __invoke(ListenerProviderInterface $listenerProvider)
     {
         $this->listenerProvider = $listenerProvider;
     }
@@ -53,8 +54,12 @@ class Dispatcher implements EventDispatcherInterface
     {
         // TODO: Implement dispatch() method.
 
-        if (!$event instanceof EventInterface) {
+        if (! $event instanceof EventInterface) {
             throw new TypeError('The named event must implement \Raylin666\Contract\EventInterface.');
+        }
+
+        if (! $this->listenerProvider instanceof ListenerProviderInterface) {
+            throw new Exception('Be sure to set the listener provider class.');
         }
 
         if ($this->isEventPropagationStopped($event)) {
