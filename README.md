@@ -138,15 +138,9 @@ $eventDispatcher->dispatch(new OnStartEvent());
 
 ```
 
-### 更新日志
+## 更新日志
 
 请查看 [CHANGELOG.md](CHANGELOG.md)
-
-### 贡献
-
-非常欢迎感兴趣，愿意参与其中，共同打造更好PHP生态，Swoole生态的开发者。
-
-* 在你的系统中使用，将遇到的问题 [反馈](https://github.com/raylin666/event-dispatcher/issues)
 
 ### 联系
 
