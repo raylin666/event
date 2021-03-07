@@ -30,7 +30,6 @@ class Dispatcher implements EventDispatcherInterface
     protected $listenerProvider;
 
     /**
-     * Dispatcher constructor.
      * @param ListenerProviderInterface $listenerProvider
      */
     public function __invoke(ListenerProviderInterface $listenerProvider)
