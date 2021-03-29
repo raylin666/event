@@ -10,7 +10,6 @@
     "psr-14",
     "event-dispacher"
   ],
-  "homepage": "https://github.com/raylin666/event-dispatcher",
   "license" : "Apache-2.0",
   "authors": [
     {
